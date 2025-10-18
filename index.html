@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolución del capitalismo: Industrial → Vigilancia → Hipercapitalismo tecnológico</title>
+<style>
+  :root{
+    --bg:#f7f9fc; --fg:#243043; --muted:#5b6b7c; --line:#e4eaf3;
+    --c1:#edf2ff; --c2:#e6fffb; --c3:#fff7ed;
+    --h1:#3b82f6; --h2:#10b981; --h3:#f59e0b;
+    --shadow:rgba(0,0,0,.06); --shadow-hover:rgba(0,0,0,.12);
+    --tooltip-bg:#1f2937; --tooltip-fg:#f9fafb;
+  }
+  
+  [data-theme="dark"] {
+    --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --line:#334155;
+    --c1:#1e293b; --c2:#134e4a; --c3:#422006;
+    --shadow:rgba(0,0,0,.3); --shadow-hover:rgba(0,0,0,.5);
+    --tooltip-bg:#f9fafb; --tooltip-fg:#1f2937;
+  }
+  
+  *{box-sizing:border-box; margin:0; padding:0;}
+  
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
+    background:linear-gradient(135deg,var(--bg) 0%, #fff 100%);
+    color:var(--fg);
+    line-height:1.6;
+    min-height:100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  
+  [data-theme="dark"] body {
+    background:linear-gradient(135deg,var(--bg) 0%, #1e293b 100%);
+  }
+  
+  .wrap{
+    max-width:1200px;
+    margin:0 auto;
+    padding:32px 20px;
+  }
+  
+  .header-section{
+    margin-bottom:32px;
+    animation: fadeInDown 0.6s ease;
+  }
+  
+  h1{
+    font-size:clamp(24px, 4vw, 32px);
+    font-weight:800;
+    margin:0 0 12px;
+    background:linear-gradient(135deg, var(--h1), var(--h2));
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    letter-spacing:-0.02em;
+  }
+  
+  p.lead{
+    font-size:16px;
+    color:var(--muted);
+    margin:0 0 24px;
+  }
+  
+  .controls{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:24px;
+  }
+  
+  .search-box{
+    position:relative;
+    flex:1;
+    min-width:240px;
+    max-width:400px;
+  }
+  
+  .search-box input{
+    width:100%;
+    padding:12px 16px 12px 42px;
+    border:2px solid var(--line);
+    border-radius:12px;
+    font-size:14px;
+    background:#fff;
+    color:var(--fg);
+    transition:all 0.3s ease;
+    font-family:inherit;
+  }
+  
+  [data-theme="dark"] .search-box input {
+    background:var(--c1);
+  }
+  
+  .search-box input:focus{
+    outline:none;
+    border-color:var(--h1);
+    box-shadow:0 0 0 3px rgba(59,130,246,0.1);
+  }
+  
+  .search-box::before{
+    content:"🔍";
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:16px;
+  }
+  
+  button{
+    appearance:none;
+    border:2px solid var(--line);
+    background:#fff;
+    border-radius:12px;
+    padding:12px 20px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:14px;
+    transition:all 0.3s ease;
+    font-family:inherit;
+    color:var(--fg);
+  }
+  
+  [data-theme="dark"] button {
+    background:var(--c1);
+  }
+  
+  button:hover{
+    background:var(--h1);
+    color:#fff;
+    border-color:var(--h1);
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(59,130,246,0.3);
+  }
+  
+  button.active{
+    background:var(--h1);
+    color:#fff;
+    border-color:var(--h1);
+  }
+  
+  .legend{
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+    padding:16px;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 2px 8px var(--shadow);
+  }
+  
+  [data-theme="dark"] .legend {
+    background:var(--c1);
+  }
+  
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:600;
+    font-size:14px;
+  }
+  
+  .dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    box-shadow:0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .l1{background:linear-gradient(135deg, #3b82f6, #2563eb);}
+  .l2{background:linear-gradient(135deg, #10b981, #059669);}
+  .l3{background:linear-gradient(135deg, #f59e0b, #d97706);}
+  
+  .board{
+    width:100%;
+    border:2px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 20px 60px var(--shadow);
+    background:#fff;
+    animation: fadeInUp 0.8s ease;
+  }
+  
+  [data-theme="dark"] .board {
+    background:var(--c1);
+  }
+  
+  .row{
+    display:grid;
+    grid-template-columns:240px 1fr 1fr 1fr;
+    min-height:60px;
+    border-top:2px solid var(--line);
+    transition:all 0.3s ease;
+  }
+  
+  .row:first-child{border-top:none;}
+  
+  .row:hover:not(.header){
+    background:rgba(59,130,246,0.02);
+    transform:scale(1.01);
+  }
+  
+  [data-theme="dark"] .row:hover:not(.header){
+    background:rgba(59,130,246,0.05);
+  }
+  
+  .row.header{
+    background:linear-gradient(135deg, #f8fafc, #f1f5f9);
+    position:sticky;
+    top:0;
+    z-index:10;
+    box-shadow:0 2px 8px var(--shadow);
+  }
+  
+  [data-theme="dark"] .row.header {
+    background:linear-gradient(135deg, #1e293b, #334155);
+  }
+  
+  .row.hidden{
+    display:none;
+  }
+  
+  .cell{
+    padding:16px 18px;
+    border-left:2px solid var(--line);
+    display:flex;
+    align-items:center;
+    font-size:14px;
+    position:relative;
+    transition:all 0.3s ease;
+  }
+  
+  .row .cell:first-child{border-left:none;}
+  
+  .th{
+    font-weight:700;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--fg);
+  }
+  
+  .dim{
+    background:linear-gradient(135deg, #f8fafc, #f1f5f9);
+    font-weight:700;
+    color:#1e293b;
+    font-size:15px;
+  }
+  
+  [data-theme="dark"] .dim {
+    background:linear-gradient(135deg, #1e293b, #334155);
+    color:#e2e8f0;
+  }
+  
+  .stage1{
+    background:var(--c1);
+    border-left-color:var(--h1);
+    border-left-width:4px;
+  }
+  
+  .stage2{
+    background:var(--c2);
+    border-left-color:var(--h2);
+    border-left-width:4px;
+  }
+  
+  .stage3{
+    background:var(--c3);
+    border-left-color:var(--h3);
+    border-left-width:4px;
+  }
+  
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    font-weight:700;
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:999px;
+    margin-left:8px;
+    white-space:nowrap;
+  }
+  
+  .b1{background:rgba(59,130,246,.2);color:#1e40af;}
+  .b2{background:rgba(16,185,129,.2);color:#065f46;}
+  .b3{background:rgba(245,158,11,.2);color:#92400e;}
+  
+  /* Tooltip mejorado */
+  .cell[data-title]{cursor:help;}
+  
+  .tooltip{
+    position:absolute;
+    bottom:100%;
+    left:50%;
+    transform:translateX(-50%) translateY(-8px);
+    background:var(--tooltip-bg);
+    color:var(--tooltip-fg);
+    padding:12px 16px;
+    border-radius:10px;
+    font-size:13px;
+    line-height:1.5;
+    width:max-content;
+    max-width:320px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    z-index:100;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .tooltip::after{
+    content:'';
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:var(--tooltip-bg);
+  }
+  
+  .cell[data-title]:hover .tooltip{
+    opacity:1;
+    transform:translateX(-50%) translateY(-12px);
+  }
+  
+  .foot{
+    margin-top:32px;
+    padding:20px;
+    background:#fff;
+    border-radius:12px;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.8;
+    box-shadow:0 2px 8px var(--shadow);
+  }
+  
+  [data-theme="dark"] .foot {
+    background:var(--c1);
+  }
+  
+  .foot strong{color:var(--fg);}
+  
+  /* Animaciones */
+  @keyframes fadeInDown{
+    from{opacity:0; transform:translateY(-20px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  
+  @keyframes fadeInUp{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  
+  /* Highlight para búsqueda */
+  .highlight{
+    background:rgba(245,158,11,0.3);
+    padding:2px 4px;
+    border-radius:3px;
+    font-weight:600;
+  }
+  
+  .no-results{
+    padding:40px;
+    text-align:center;
+    color:var(--muted);
+    font-size:16px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 960px){
+    .row{grid-template-columns:200px 1fr 1fr 1fr;}
+  }
+  
+  @media (max-width: 768px){
+    .row{grid-template-columns:160px 1fr 1fr 1fr;}
+    .cell{padding:12px 14px; font-size:13px;}
+    .dim{font-size:14px;}
+    h1{font-size:24px;}
+    .controls{flex-direction:column; align-items:stretch;}
+    .search-box{max-width:100%;}
+  }
+  
+  @media (max-width: 640px){
+    .wrap{padding:20px 12px;}
+    .row{
+      grid-template-columns:1fr;
+      min-height:auto;
+    }
+    .row .cell{
+      border-left:none;
+      border-top:1px solid var(--line);
+    }
+    .row.header{
+      display:none;
+    }
+    .dim{
+      background:linear-gradient(135deg, #e0e7ff, #dbeafe);
+      font-size:15px;
+      font-weight:800;
+    }
+    [data-theme="dark"] .dim {
+      background:linear-gradient(135deg, #1e3a8a, #1e40af);
+    }
+    .stage1, .stage2, .stage3{
+      background:#fff;
+      border-left:none;
+      border-top:4px solid;
+    }
+    [data-theme="dark"] .stage1,
+    [data-theme="dark"] .stage2,
+    [data-theme="dark"] .stage3 {
+      background:var(--c1);
+    }
+    .stage1{border-top-color:var(--h1);}
+    .stage2{border-top-color:var(--h2);}
+    .stage3{border-top-color:var(--h3);}
+    
+    .cell::before{
+      content:attr(data-label);
+      display:block;
+      font-weight:700;
+      font-size:11px;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:4px;
+      letter-spacing:0.05em;
+    }
+    
+    .tooltip{
+      position:fixed;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      max-width:calc(100vw - 40px);
+    }
+    
+    .cell[data-title]:hover .tooltip{
+      transform:translateX(-50%);
+    }
+  }
+  
+  /* Print styles */
+  @media print{
+    body{background:#fff;}
+    .controls, .foot{display:none;}
+    .board{box-shadow:none; border:1px solid #000;}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header-section">
+      <h1>Evolución del capitalismo: Industrial → Vigilancia → Hipercapitalismo tecnológico</h1>
+      <p class="lead">Análisis comparativo por dimensiones económicas, sociales, políticas y simbólicas. Explora las transformaciones del sistema capitalista a través de tres etapas históricas.</p>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <span class="dot l1"></span>
+        <span>Capitalismo Industrial (S. XIX-XX)</span>
+      </div>
+      <div class="legend-item">
+        <span class="dot l2"></span>
+        <span>Capitalismo de Vigilancia (2000-2015)</span>
+      </div>
+      <div class="legend-item">
+        <span class="dot l3"></span>
+        <span>Hipercapitalismo Tecnológico (2015-hoy)</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar en la tabla..." />
+      </div>
+      <button onclick="exportPNG()">📥 Exportar PNG</button>
+      <button onclick="exportPDF()">📄 Exportar PDF</button>
+      <button onclick="toggleTheme()">🌓 Cambiar tema</button>
+      <button onclick="resetView()">↻ Resetear vista</button>
+    </div>
+
+    <div class="board" id="board">
+      <div class="row header">
+        <div class="cell th">Dimensión</div>
+        <div class="cell th">Capitalismo industrial <span class="badge b1">S. XIX–XX</span></div>
+        <div class="cell th">Capitalismo de vigilancia <span class="badge b2">2000–2015</span></div>
+        <div class="cell th">Hipercapitalismo tecnológico <span class="badge b3">2015–hoy</span></div>
+      </div>
+
+      <div class="row" data-keywords="motor acumulación producción datos ia finanzas beneficio valor">
+        <div class="cell dim">Motor de acumulación</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Producción de bienes
+          <div class="tooltip">Beneficio derivado de producir y vender bienes materiales mediante trabajo asalariado y maquinaria.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Datos + publicidad
+          <div class="tooltip">Valor extraído de datos personales y segmentación publicitaria a escala masiva.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Datos + IA + finanzas
+          <div class="tooltip">Ciclo integrado: datos → modelos de IA → automatización → captura financiera.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="recurso estratégico energía trabajo información atención emoción datos">
+        <div class="cell dim">Recurso estratégico</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Energía y trabajo
+          <div class="tooltip">Carbón, petróleo, acero y la fuerza de trabajo humana.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Información personal
+          <div class="tooltip">Rastros digitales convertidos en perfiles de comportamiento y preferencias.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Datos + atención + emoción
+          <div class="tooltip">Tiempo de atención, estados emocionales y contexto situacional además de los datos tradicionales.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="infraestructura fábricas transporte internet plataformas cloud ia sensores">
+        <div class="cell dim">Infraestructura dominante</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Fábricas y transporte
+          <div class="tooltip">Ferrocarriles, puertos, fábricas y sistemas de distribución física.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Internet y plataformas
+          <div class="tooltip">Redes IP, centros de datos y plataformas de redes sociales.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Cloud + IA + sensores
+          <div class="tooltip">Nubes globales, chips de IA, sensores IoT, gemelos digitales y modelos fundacionales.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="propiedad capital físico intelectual modelos infraestructura">
+        <div class="cell dim">Forma de propiedad</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Capital físico
+          <div class="tooltip">Máquinas, tierra, fábricas y medios de producción tangibles.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Propiedad intelectual
+          <div class="tooltip">Derechos de autor, patentes, bases de datos y algoritmos.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Propiedad de modelos e infra
+          <div class="tooltip">Control de infraestructuras cognitivas, modelos de IA exclusivos y ecosistemas tecnológicos.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="control disciplina vigilancia predicción modelado comportamiento">
+        <div class="cell dim">Forma de control</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Disciplina
+          <div class="tooltip">Disciplina de fábrica, escuela y reloj. Control del tiempo y los cuerpos.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Vigilancia
+          <div class="tooltip">Monitorización de conducta mediante cookies, dispositivos móviles y métricas digitales.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Predicción y modelado
+          <div class="tooltip">Gobernanza algorítmica que anticipa, modela y dirige comportamientos futuros.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="estado regulación nacional público privado corporativo postnacional">
+        <div class="cell dim">Relación con el Estado</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Estado nacional regulador
+          <div class="tooltip">Regulación nacional, pactos fordistas y estado de bienestar.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Híbrido público–privado
+          <div class="tooltip">Alianzas público-privadas, captura regulatoria y puertas giratorias.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Postnacional corporativo
+          <div class="tooltip">Diplomacia corporativa, estándares globales fijados por plataformas tecnológicas.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="trabajo empleo asalariado precario automatizado gig economy sindicatos">
+        <div class="cell dim">Trabajo</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Asalariado industrial
+          <div class="tooltip">Empleo estable, sindicalización, cadena de montaje y jornada laboral definida.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Precario y conectado
+          <div class="tooltip">Gig economy, microtareas, conectividad permanente y economía de plataformas.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Automatizado y vigilado
+          <div class="tooltip">Automatización cognitiva, gestión por métricas algorítmicas y gamificación del trabajo.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="subjetividad identidad obrero ciudadano usuario nodo productor">
+        <div class="cell dim">Subjetividad</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Obrero/ciudadano
+          <div class="tooltip">Identidad obrera con derechos ciudadanos, clase trabajadora organizada.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Usuario
+          <div class="tooltip">Usuario-consumidor que produce datos como subproducto de su actividad digital.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Nodo/datador
+          <div class="tooltip">Nodo cognitivo que produce atención, datos y valor en todo momento de su existencia.</div>
+        </div>
+      </div>
+
+      <div class="row" data-keywords="ideología progreso utopía digital automatización tecnosalvacionismo">
+        <div class="cell dim">Horizonte ideológico</div>
+        <div class="cell stage1" data-label="Industrial" data-title="">
+          Progreso productivo
+          <div class="tooltip">Promesa de progreso industrial, pleno empleo y mejora material continua.</div>
+        </div>
+        <div class="cell stage2" data-label="Vigilancia" data-title="">
+          Utopía digital
+          <div class="tooltip">Libertad en red, innovación disruptiva, conectividad universal y democratización.</div>
+        </div>
+        <div class="cell stage3" data-label="Hipercapitalismo" data-title="">
+          Automatización total
+          <div class="tooltip">Tecnosalvacionismo, sostenibilidad gestionada por datos y optimización total de la existencia.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="noResults" class="no-results" style="display:none;">
+      No se encontraron resultados para tu búsqueda. Intenta con otros términos.
+    </div>
+
+    <div class="foot">
+      <strong>Referencias sugeridas:</strong> Shoshana Zuboff (capitalismo de vigilancia), Nick Srnicek (capitalismo de plataformas), Byung-Chul Han (psicopolítica), Evgeny Morozov (capitalismo tecnopolítico), Paul Mason (postcapitalismo), Jathan Sadowski (tecnofeudalismo).
+      <br><br>
+      <strong>Uso:</strong> Pasa el cursor sobre las celdas para ver explicaciones detalladas. Utiliza la búsqueda para filtrar dimensiones específicas. Exporta la tabla como PNG o PDF para compartir.
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  // Búsqueda en tiempo real
+  const searchInput = document.getElementById('searchInput');
+  const rows = document.querySelectorAll('.row:not(.header)');
+  const noResults = document.getElementById('noResults');
+  
+  searchInput.addEventListener('input', function(e){
+    const query = e.target.value.toLowerCase().trim();
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const keywords = row.getAttribute('data-keywords') || '';
+      const matches = text.includes(query) || keywords.includes(query);
+      
+      if(matches || query === ''){
+        row.classList.remove('hidden');
+        visibleCount++;
+        
+        // Highlight
+        if(query !== ''){
+          row.querySelectorAll('.cell:not(.dim)').forEach(cell => {
+            const originalText = cell.childNodes[0]?.textContent || '';
+            if(originalText){
+              const regex = new RegExp(`(${query})`, 'gi');
+              const highlighted = originalText.replace(regex, '<span class="highlight">$1</span>');
+              cell.childNodes[0].nodeValue = '';
+              cell.insertAdjacentHTML('afterbegin', highlighted);
+            }
+          });
+        }
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+    
+    noResults.style.display = (visibleCount === 0 && query !== '') ? 'block' : 'none';
+  });
+  
+  // Reset view
+  function resetView(){
+    searchInput.value = '';
+    searchInput.dispatchEvent(new Event('input'));
+    rows.forEach(row => {
+      row.querySelectorAll('.highlight').forEach(span => {
+        span.outerHTML = span.textContent;
+      });
+    });
+  }
+  
+  // Toggle theme
+  function toggleTheme(){
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+  }
+  
+  // Load saved theme
+  const savedTheme = localStorage.getItem('theme');
+  if(savedTheme){
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+  
+  // Export PNG mejorado
+  async function exportPNG(){
+    const board = document.getElementById('board');
+    const button = event.target;
+    button.textContent = '⏳ Generando...';
+    button.disabled = true;
+    
+    try{
+      const canvas = await html2canvas(board, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: true
+      });
+      
+      canvas.toBlob(function(blob){
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `evolucion_capitalismo_${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        
+        button.textContent = '✓ Descargado';
+        setTimeout(() => {
+          button.textContent = '📥 Exportar PNG';
+          button.disabled = false;
+        }, 2000);
+      });
+    } catch(error){
+      console.error('Error al exportar:', error);
+      button.textContent = '❌ Error';
+      setTimeout(() => {
+        button.textContent = '📥 Exportar PNG';
+        button.disabled = false;
+      }, 2000);
+    }
+  }
+  
+  // Export PDF
+  async function exportPDF(){
+    const board = document.getElementById('board');
+    const button = event.target;
+    button.textContent = '⏳ Generando...';
+    button.disabled = true;
+    
+    try{
+      const canvas = await html2canvas(board, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+      
+      // Create simple PDF using canvas as image
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = {
+        imgData: imgData,
+        width: canvas.width,
+        height: canvas.height
+      };
+      
+      // Simple implementation - create downloadable link
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = `evolucion_capitalismo_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      button.textContent = '✓ Descargado';
+      setTimeout(() => {
+        button.textContent = '📄 Exportar PDF';
+        button.disabled = false;
+      }, 2000);
+    } catch(error){
+      console.error('Error al exportar:', error);
+      button.textContent = '❌ Error';
+      setTimeout(() => {
+        button.textContent = '📄 Exportar PDF';
+        button.disabled = false;
+      }, 2000);
+    }
+  }
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e){
+    // Ctrl/Cmd + F para buscar
+    if((e.ctrlKey || e.metaKey) && e.key === 'f'){
+      e.preventDefault();
+      searchInput.focus();
+    }
+    // Escape para resetear
+    if(e.key === 'Escape'){
+      resetView();
+    }
+    // Ctrl/Cmd + D para cambiar tema
+    if((e.ctrlKey || e.metaKey) && e.key === 'd'){
+      e.preventDefault();
+      toggleTheme();
+    }
+  });
+</script>
+</body>
+</html>
